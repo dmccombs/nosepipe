@@ -11,7 +11,13 @@ You can also install nosepipe via pip or find it on PyPI at: https://pypi.python
 Installing
 ========
 
-Run python ./setup.py install.
+You can install the latest git version by cloning the repository and running:
+
+python ./setup.py install
+
+Otherwise, you can install the latest released version from pip via:
+
+pip install nosepipe
 
 Usage
 ========
