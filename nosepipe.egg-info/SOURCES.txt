@@ -1,0 +1,15 @@
+CHANGES.txt
+LICENSE.txt
+nosepipe.py
+setup.cfg
+setup.py
+test_nosepipe.rst
+nosepipe.egg-info/PKG-INFO
+nosepipe.egg-info/SOURCES.txt
+nosepipe.egg-info/dependency_links.txt
+nosepipe.egg-info/entry_points.txt
+nosepipe.egg-info/requires.txt
+nosepipe.egg-info/top_level.txt
+nosepipe.egg-info/zip-safe
+test-support/failing/failing_tests.py
+test-support/passing/passing_tests.py

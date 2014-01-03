@@ -1,0 +1,4 @@
+[nose.plugins.0.10]
+process-isolation = nosepipe:ProcessIsolationPlugin
+process-isolation-reporter = nosepipe:ProcessIsolationReporterPlugin
+
