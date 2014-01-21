@@ -14,7 +14,7 @@ import sys
 
 import nose.plugins
 
-__version__ = "0.2a"
+__version__ = "0.3"
 
 SUBPROCESS_ENV_KEY = "NOSE_WITH_PROCESS_ISOLATION_REPORTER"
 

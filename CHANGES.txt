@@ -3,5 +3,8 @@
 This isn't really in proper GNU ChangeLog format, it just happens to
 look that way.
 
+2014-01-21 Dan McCombs <dmccombs@dyn.com>
+	* 0.3 Python 3 compatible release
+
 2007-12-22 John J Lee <jjl@pobox.com>
 	* 0.2a release (first release)
