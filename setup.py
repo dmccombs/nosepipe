@@ -3,9 +3,9 @@
 from setuptools import setup
 
 setup(
-    name="nosepipe-py3",
+    name="nosepipe",
     version="0.3",
-    download_url = "http://pypi.python.org/pypi/nosepipe-py3/",
+    download_url = "http://pypi.python.org/pypi/nosepipe/",
 
     description = "Plugin for the nose testing framework for running tests in "
                   "a subprocess",
@@ -16,7 +16,7 @@ setup(
 
     install_requires = ["nose>=0.1.0, ==dev"],
 
-    url = "http://github.com/dmccombs/nosepipe-py3/",
+    url = "http://github.com/dmccombs/nosepipe/",
 
     long_description = """\
 Plugin for the nose testing framework for running tests in a subprocess.

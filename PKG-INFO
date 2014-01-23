@@ -1,12 +1,12 @@
 Metadata-Version: 1.0
-Name: nosepipe-py3
+Name: nosepipe
 Version: 0.3
 Summary: Plugin for the nose testing framework for running tests in a subprocess
-Home-page: http://github.com/dmccombs/nosepipe-py3
+Home-page: http://github.com/dmccombs/nosepipe
 Author: John J. Lee, Dan McCombs
 Author-email: dmccombs@dyn.com
 License: BSD
-Download-URL: http://pypi.python.org/pypi/nosepipe-py3/
+Download-URL: http://pypi.python.org/pypi/nosepipe/
 Description: Plugin for the nose testing framework for running tests in a subprocess.
         
         Use ``nosetests --with-process-isolation`` to enable the plugin.  When enabled,
