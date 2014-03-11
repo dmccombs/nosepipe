@@ -142,10 +142,19 @@ class SubprocessTestProxy(object):
         argv = [os.path.abspath(sys.argv[0]),
                 '--with-process-isolation-reporter',
                 test_name]
+        useshell = False
+
+        # Shell should be used on Windows since this is likely executing a
+        # script rather than an exe, but shell can cause problems on other
+        # operating systems. 'win32' is also 64-bit Windows.
+        if sys.platform == 'win32':
+            useshell = True
+
         popen = subprocess.Popen(argv,
                                  cwd=os.getcwd(),
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.STDOUT,
+                                 shell=useshell,
                                  )
         try:
             stdout = popen.stdout
