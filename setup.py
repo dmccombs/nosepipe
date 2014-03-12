@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="nosepipe",
-    version="0.3",
+    version="0.4",
     download_url = "http://pypi.python.org/pypi/nosepipe/",
 
     description = "Plugin for the nose testing framework for running tests in "
