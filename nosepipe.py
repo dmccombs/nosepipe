@@ -243,7 +243,17 @@ class ProcessIsolationPlugin(nose.plugins.Plugin):
                     result.append(arg)
         return result
 
+    def options(self, parser, env):
+        nose.plugins.Plugin.options(self, parser, env)
+        env_opt = 'NODE_WITH_PROCESS_ISOLATION_INDIVIDUAL'
+        parser.add_option('--with-process-isolation-individual',
+                          action='store_true',
+                          help='Run only selected tests in separate '+
+                          'processes [%s].' % env_opt,
+                          default=env.get(env_opt))
+
     def configure(self, options, config):
+        self.individual = options.with_process_isolation_individual
         nose.plugins.Plugin.configure(self, options, config)
         if self.enabled and options.enable_plugin_coverage:
             from coverage import coverage
@@ -258,11 +268,28 @@ class ProcessIsolationPlugin(nose.plugins.Plugin):
             coverage.save = coverage.load
 
 
+    def do_isolate(self, test):
+        # XXX is there better way to access 'nosepipe_isolate'?
+        if not self.individual:
+            return True
+        if hasattr(test.test, 'nosepipe_isolate'):
+            return True
+        if hasattr(test.test, 'test') \
+           and hasattr(test.test.test, 'nosepipe_isolate'):
+            return True
+
     def prepareTestCase(self, test):
-        self._test = test
-        self._test_proxy = SubprocessTestProxy(test, self._argv, self._cwd)
-        return self._test_proxy
+        if self.do_isolate(test):
+            self._test = test
+            self._test_proxy = SubprocessTestProxy(test, self._argv, self._cwd)
+            return self._test_proxy
 
     def afterTest(self, test):
         self._test_proxy = None
         self._test = None
+
+
+def isolate(obj):
+    '''Mark testcase as isolated in separate process.'''
+    setattr(obj, 'nosepipe_isolate', True)
+    return obj
