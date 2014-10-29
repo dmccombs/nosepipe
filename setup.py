@@ -4,12 +4,12 @@ from setuptools import setup
 
 setup(
     name="nosepipe",
-    version="0.4",
+    version="0.5",
     download_url = "http://pypi.python.org/pypi/nosepipe/",
 
     description = "Plugin for the nose testing framework for running tests in "
                   "a subprocess",
-    author = "John J. Lee, Dan McCombs",
+    author = "John J. Lee, Dan McCombs, Vadim Markovtsev",
     author_email = "dmccombs@dyn.com",
     license = "BSD",
     platforms = ["any"],
