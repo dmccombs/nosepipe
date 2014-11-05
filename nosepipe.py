@@ -245,9 +245,18 @@ class ProcessIsolationPlugin(nose.plugins.Plugin):
 
     def configure(self, options, config):
         nose.plugins.Plugin.configure(self, options, config)
-        if self.enabled:
-            # Outer coverage plugin overwrites output from inner processes
-            options.enable_plugin_coverage = None
+        if self.enabled and options.enable_plugin_coverage:
+            from coverage import coverage
+
+            def nothing(*args, **kwargs):
+                pass
+
+            # Monkey patch coverage to fix the reporting and friends
+            coverage.start = nothing
+            coverage.stop = nothing
+            coverage.combine = nothing
+            coverage.save = coverage.load
+
 
     def prepareTestCase(self, test):
         self._test = test
