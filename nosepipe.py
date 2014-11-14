@@ -6,6 +6,7 @@ each test is run in a separate process.
 Copyright 2007 John J. Lee <jjl@pobox.com>
 """
 
+import logging
 import os
 import pickle
 import struct
@@ -14,7 +15,7 @@ import sys
 
 import nose.plugins
 
-__version__ = "0.4"
+__version__ = "0.5"
 
 SUBPROCESS_ENV_KEY = "NOSE_WITH_PROCESS_ISOLATION_REPORTER"
 
@@ -70,12 +71,6 @@ class ProcessIsolationReporterPlugin(nose.plugins.Plugin):
 
     name = "process-isolation-reporter"
 
-    def configure(self, options, conf):
-        if not self.can_configure:
-            return
-        self.conf = conf
-        self.enabled = '--with-' + self.name in sys.argv
-
     def setOutputStream(self, stream):
         # we use stdout for IPC, so block all other output
         self._stream = sys.__stdout__
@@ -122,8 +117,11 @@ class ProcessIsolationReporterPlugin(nose.plugins.Plugin):
 
 
 class SubprocessTestProxy(object):
-    def __init__(self, test):
+    def __init__(self, test, argv, cwd):
         self._test = test
+        self._argv = argv
+        self._cwd = cwd
+        self.logger = logging.getLogger('nose.plugins.process_isolation')
 
     def _name_from_address(self, address):
         filename, module, call = address
@@ -139,9 +137,7 @@ class SubprocessTestProxy(object):
 
     def __call__(self, result):
         test_name = self._name_from_address(self._test.address())
-        argv = [os.path.abspath(sys.argv[0]),
-                '--with-process-isolation-reporter',
-                test_name]
+        argv = self._argv + [test_name]
         useshell = False
 
         # Shell should be used on Windows since this is likely executing a
@@ -150,8 +146,9 @@ class SubprocessTestProxy(object):
         if sys.platform == 'win32':
             useshell = True
 
+        self.logger.debug("Executing %s", " ".join(argv))
         popen = subprocess.Popen(argv,
-                                 cwd=os.getcwd(),
+                                 cwd=self._cwd,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.STDOUT,
                                  shell=useshell,
@@ -194,13 +191,76 @@ class ProcessIsolationPlugin(nose.plugins.Plugin):
         nose.plugins.Plugin.__init__(self)
         self._test = None
         self._test_proxy = None
+        self._argv = [os.path.abspath(sys.argv[0]),
+                      '--with-process-isolation-reporter']
+        self._argv += ProcessIsolationPlugin._get_nose_whitelisted_argv()
+        # Getting cwd inside SubprocessTestProxy.__call__ is too late - it is
+        # already changed by nose
+        self._cwd = os.getcwd()
+
+    @staticmethod
+    def _get_nose_whitelisted_argv():
+        # This is the list of nose options which should be passed through to
+        # the launched process; boolean value defines whether the option
+        # takes a value or not.
+        whitelist = {
+            '--debug-log': True,
+            '--logging-config': True,
+            '--no-byte-compile': False,
+            '--nologcapture': False,
+            '--logging-format': True,
+            '--logging-datefmt': True,
+            '--logging-filter': True,
+            '--logging-clear-handlers': False,
+            '--logging-level': True,
+            '--with-coverage': False,
+            '--cover-package': True,
+            '--cover-tests': False,
+            '--cover-min-percentage': True,
+            '--cover-inclusive': False,
+            '--cover-branches': False,
+            '--no-deprecated': False,
+            '--with-doctest': False,
+            '--doctest-tests': False,
+            '--doctest-extension': True,
+            '--doctest-result-variable': True,
+            '--doctest-fixtures': True,
+            '--doctest-options': True,
+            '--no-skip': False,
+        }
+        filtered = set(whitelist.keys()).intersection(set(sys.argv[1:]))
+        result = []
+        for key in filtered:
+            result.append(key)
+            if whitelist[key]:
+                result.append(sys.argv[sys.argv.index(key) + 1])
+
+        # We are not finished yet: options with '=' were not handled
+        whitelist_keyval = [(k + "=") for k, v in whitelist.items() if v]
+        for arg in sys.argv[1:]:
+            for keyval in whitelist_keyval:
+                if arg.startswith(keyval):
+                    result.append(arg)
+        return result
 
     def configure(self, options, config):
         nose.plugins.Plugin.configure(self, options, config)
+        if self.enabled and options.enable_plugin_coverage:
+            from coverage import coverage
+
+            def nothing(*args, **kwargs):
+                pass
+
+            # Monkey patch coverage to fix the reporting and friends
+            coverage.start = nothing
+            coverage.stop = nothing
+            coverage.combine = nothing
+            coverage.save = coverage.load
+
 
     def prepareTestCase(self, test):
         self._test = test
-        self._test_proxy = SubprocessTestProxy(test)
+        self._test_proxy = SubprocessTestProxy(test, self._argv, self._cwd)
         return self._test_proxy
 
     def afterTest(self, test):
