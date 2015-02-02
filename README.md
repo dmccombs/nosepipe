@@ -27,5 +27,37 @@ pip install nosepipe
 Usage
 ========
 
-To use Nosepipe, simply add --with-process-isolation to your nosetests command.
-When enabled, each test is run in a separate process.
+To use Nosepipe, add --with-process-isolation to your nosetests command and
+decorate tests to be run separately:
+
+    import nosepipe
+
+    def test_something():
+        # In subprocess
+        pass
+
+If --with-process-isolation-individual option is used in addition, then every
+test (either a top-level function or a class) need to be decorated to be run in
+a separate process.
+
+    import nosepipe
+
+    def test_something():
+        # In main process
+        pass
+
+    class TestClass(unittest.TestCase):
+        # In main process
+        def test_something():
+            pass
+
+    @nosepipe.isolate
+    def test_another():
+        # In subprocess
+        pass
+
+    @nosepipe.isolate
+    class AnotherTestClass(unittest.TestCase):
+        # In subprocess
+        def test_another():
+            pass
