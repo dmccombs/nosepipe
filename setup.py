@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="nosepipe",
-    version="0.5",
+    version="0.6",
     download_url = "http://pypi.python.org/pypi/nosepipe/",
 
     description = "Plugin for the nose testing framework for running tests in "
@@ -23,6 +23,10 @@ Plugin for the nose testing framework for running tests in a subprocess.
 
 Use ``nosetests --with-process-isolation`` to enable the plugin.  When enabled,
 each test is run in a separate process.
+
+Additionally add the ``--with-process-isolation-individual`` option and decorate
+top level test functions or classes with ``@nosepipe.isolate`` to only run those
+tests in isolation.
 
 Supports Python 2 and 3.
 """,
