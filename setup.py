@@ -16,6 +16,8 @@ setup(
 
     install_requires = ["nose>=0.1.0"],
 
+    tests_require = ["django-nose"],
+
     url = "http://github.com/dmccombs/nosepipe/",
 
     long_description = """\
