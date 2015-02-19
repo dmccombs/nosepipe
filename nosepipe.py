@@ -147,12 +147,16 @@ class SubprocessTestProxy(object):
             useshell = True
 
         self.logger.debug("Executing %s", " ".join(argv))
-        popen = subprocess.Popen(argv,
-                                 cwd=self._cwd,
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.STDOUT,
-                                 shell=useshell,
-                                 )
+        try:
+            popen = subprocess.Popen(argv,
+                                     cwd=self._cwd,
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.STDOUT,
+                                     shell=useshell,
+                                     )
+        except OSError as e:
+            raise Exception("Error running %s [%s]" % (argv[0], e))
+
         try:
             stdout = popen.stdout
             while True:
