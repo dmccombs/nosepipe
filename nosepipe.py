@@ -255,18 +255,20 @@ class ProcessIsolationPlugin(nose.plugins.Plugin):
     def configure(self, options, config):
         self.individual = options.with_process_isolation_individual
         nose.plugins.Plugin.configure(self, options, config)
-        if self.enabled and options.enable_plugin_coverage:
-            from coverage import coverage
+        try:
+            if self.enabled and options.enable_plugin_coverage:
+                from coverage import coverage
 
-            def nothing(*args, **kwargs):
-                pass
+                def nothing(*args, **kwargs):
+                    pass
 
-            # Monkey patch coverage to fix the reporting and friends
-            coverage.start = nothing
-            coverage.stop = nothing
-            coverage.combine = nothing
-            coverage.save = coverage.load
-
+                # Monkey patch coverage to fix the reporting and friends
+                coverage.start = nothing
+                coverage.stop = nothing
+                coverage.combine = nothing
+                coverage.save = coverage.load
+        except:
+            pass
 
     def do_isolate(self, test):
         # XXX is there better way to access 'nosepipe_isolate'?

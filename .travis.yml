@@ -1,0 +1,18 @@
+language: python
+python:
+  - "2.6"
+  - "2.7"
+  - "3.3"
+  - "3.4"
+  - "pypy"
+env:
+  - EGGS="nose==dev"
+  - EGGS=""
+# command to install dependencies, e.g. pip install -r requirements.txt
+install:
+  - if [ -n "$EGGS" ] ; then pip install $EGGS --allow-external=nose --allow-unverified=nose ; fi
+  - python setup.py develop
+# command to run tests, e.g. python setup.py test
+script:
+  - # python setup.py nosetests --verbosity=3
+  - nosetests --verbosity=3
