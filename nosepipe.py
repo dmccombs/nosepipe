@@ -147,12 +147,16 @@ class SubprocessTestProxy(object):
             useshell = True
 
         self.logger.debug("Executing %s", " ".join(argv))
-        popen = subprocess.Popen(argv,
-                                 cwd=self._cwd,
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.STDOUT,
-                                 shell=useshell,
-                                 )
+        try:
+            popen = subprocess.Popen(argv,
+                                     cwd=self._cwd,
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.STDOUT,
+                                     shell=useshell,
+                                     )
+        except OSError as e:
+            raise Exception("Error running %s [%s]" % (argv[0], e))
+
         try:
             stdout = popen.stdout
             while True:
@@ -191,18 +195,49 @@ class ProcessIsolationPlugin(nose.plugins.Plugin):
         nose.plugins.Plugin.__init__(self)
         self._test = None
         self._test_proxy = None
-        self._argv = [os.path.abspath(sys.argv[0]),
-                      '--with-process-isolation-reporter']
-        self._argv += ProcessIsolationPlugin._get_nose_whitelisted_argv()
+
+        # Normally, nose is called as:
+        #     nosetests {opt1} {opt2} ...
+        # However, we can also be run as:
+        #     setup.py nosetests {opt1} {opt2} ...
+        # When not running directly as nosetests, we need to run the
+        # sub-processes as `nosetests`, not `setup.py nosetests` as the output
+        # of setup.py interferes with the nose output.  So, we need to find
+        # where nosetests is on the command-line and then run the
+        # sub-processes command-line using the args from that location.
+
+        nosetests_index = None
+        # Find where nosetests is in argv and start the new argv from there
+        # in case we're running as something like `setup.py nosetests`
+        for i in range(0, len(sys.argv)):
+            if 'nosetests' in sys.argv[i]:
+                self._argv = [sys.argv[i]]
+                nosetests_index = i
+                break
+
+        # If we can't find nosetests in the command-line we must be running
+        # from some other test runner like django's `manage.py test`.  Replace
+        # the runner with `nosttests` and proceed...
+        if nosetests_index is None:
+            nosetests_index = 0
+            self._argv = ['nosetests']
+
+        self._argv += ['--with-process-isolation-reporter']
+        # add the rest of the args that appear in argv after `nosetests`
+        self._argv += ProcessIsolationPlugin._get_nose_whitelisted_argv(
+            offset=nosetests_index + 1)
         # Getting cwd inside SubprocessTestProxy.__call__ is too late - it is
         # already changed by nose
         self._cwd = os.getcwd()
 
     @staticmethod
-    def _get_nose_whitelisted_argv():
+    def _get_nose_whitelisted_argv(offset=1):
         # This is the list of nose options which should be passed through to
         # the launched process; boolean value defines whether the option
         # takes a value or not.
+        #
+        # offset: int, the argv index of the first nosetests option.
+        #
         whitelist = {
             '--debug-log': True,
             '--logging-config': True,
@@ -228,7 +263,7 @@ class ProcessIsolationPlugin(nose.plugins.Plugin):
             '--doctest-options': True,
             '--no-skip': False,
         }
-        filtered = set(whitelist.keys()).intersection(set(sys.argv[1:]))
+        filtered = set(whitelist.keys()).intersection(set(sys.argv[offset:]))
         result = []
         for key in filtered:
             result.append(key)
@@ -237,7 +272,7 @@ class ProcessIsolationPlugin(nose.plugins.Plugin):
 
         # We are not finished yet: options with '=' were not handled
         whitelist_keyval = [(k + "=") for k, v in whitelist.items() if v]
-        for arg in sys.argv[1:]:
+        for arg in sys.argv[offset:]:
             for keyval in whitelist_keyval:
                 if arg.startswith(keyval):
                     result.append(arg)
@@ -255,18 +290,20 @@ class ProcessIsolationPlugin(nose.plugins.Plugin):
     def configure(self, options, config):
         self.individual = options.with_process_isolation_individual
         nose.plugins.Plugin.configure(self, options, config)
-        if self.enabled and options.enable_plugin_coverage:
-            from coverage import coverage
+        try:
+            if self.enabled and options.enable_plugin_coverage:
+                from coverage import coverage
 
-            def nothing(*args, **kwargs):
-                pass
+                def nothing(*args, **kwargs):
+                    pass
 
-            # Monkey patch coverage to fix the reporting and friends
-            coverage.start = nothing
-            coverage.stop = nothing
-            coverage.combine = nothing
-            coverage.save = coverage.load
-
+                # Monkey patch coverage to fix the reporting and friends
+                coverage.start = nothing
+                coverage.stop = nothing
+                coverage.combine = nothing
+                coverage.save = coverage.load
+        except:
+            pass
 
     def do_isolate(self, test):
         # XXX is there better way to access 'nosepipe_isolate'?

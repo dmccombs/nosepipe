@@ -14,7 +14,9 @@ setup(
     license = "BSD",
     platforms = ["any"],
 
-    install_requires = ["nose>=0.1.0, ==dev"],
+    install_requires = ["nose>=0.1.0"],
+
+    tests_require = ["django-nose"],
 
     url = "http://github.com/dmccombs/nosepipe/",
 

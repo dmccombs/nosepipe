@@ -1,3 +1,10 @@
 build/
 dist/
 *.egg-info/
+wheelhouse/
+.eggs/
+*.egg/
+*.pyc
+*.sw?
+.coverage
+test-support/django/db.sqlite3
