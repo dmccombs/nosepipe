@@ -3,6 +3,8 @@
 This isn't really in proper GNU ChangeLog format, it just happens to
 look that way.
 
+2015-03-17 Dan McCombs <dmccombs@dyn.com>
+	* 0.7 PIP dependency fixes; support for running from manage.py (Thanks Marc Prewitt)
 2015-02-02 Dan McCombs <dmccombs@dyn.com>
 	* 0.6 Added option to run only certain tests in isolaton (Thanks Mikhail Gusarov)
 2014-10-29 Vadim Markovtsev <v.markovtsev@samsung.com>
