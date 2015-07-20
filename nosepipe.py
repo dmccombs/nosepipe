@@ -280,7 +280,7 @@ class ProcessIsolationPlugin(nose.plugins.Plugin):
 
     def options(self, parser, env):
         nose.plugins.Plugin.options(self, parser, env)
-        env_opt = 'NODE_WITH_PROCESS_ISOLATION_INDIVIDUAL'
+        env_opt = 'NOSE_WITH_PROCESS_ISOLATION_INDIVIDUAL'
         parser.add_option('--with-process-isolation-individual',
                           action='store_true',
                           help='Run only selected tests in separate '+
