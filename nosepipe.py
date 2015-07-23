@@ -74,6 +74,11 @@ class ProcessIsolationReporterPlugin(nose.plugins.Plugin):
     def setOutputStream(self, stream):
         # we use stdout for IPC, so block all other output
         self._stream = sys.__stdout__
+        # prevent 0x0A (LF) byte automatically converting to 0x0D0A (CRLF)
+        # bytes by forcing stdout to binary mode on Windows
+        if sys.platform == 'win32':
+            import msvcrt
+            msvcrt.setmode(self._stream.fileno(), os.O_BINARY)
         return NullWritelnFile()
 
     def startTest(self, test):
