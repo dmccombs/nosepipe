@@ -3,6 +3,8 @@
 This isn't really in proper GNU ChangeLog format, it just happens to
 look that way.
 
+2016-02-19 Dan McCombs <dmccombs@dyn.com>
+	* 0.8 Environment variable typo fix; prevent line endings being converted on Windows causing communication errors (Thanks Janne Hakonen)
 2015-03-17 Dan McCombs <dmccombs@dyn.com>
 	* 0.7 PIP dependency fixes; support for running from manage.py (Thanks Marc Prewitt)
 2015-02-02 Dan McCombs <dmccombs@dyn.com>
