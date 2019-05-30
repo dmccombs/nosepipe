@@ -156,7 +156,7 @@ class SubprocessTestProxy(object):
             popen = subprocess.Popen(argv,
                                      cwd=self._cwd,
                                      stdout=subprocess.PIPE,
-                                     stderr=subprocess.STDOUT,
+                                     stderr=subprocess.PIPE,
                                      shell=useshell,
                                      )
         except OSError as e:
