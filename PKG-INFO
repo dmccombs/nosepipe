@@ -1,6 +1,6 @@
 Metadata-Version: 1.0
 Name: nosepipe
-Version: 0.8
+Version: 0.9
 Summary: Plugin for the nose testing framework for running tests in a subprocess
 Home-page: http://github.com/dmccombs/nosepipe
 Author: John J. Lee, Dan McCombs
